@@ -86,6 +86,7 @@ addClusters() {
         kubectl apply -n default -f $templates_dir/job-$env.yaml
     done
     for env in $envs; do
+        job_name=argocd-add-cluster-$env
         kubectl wait --for=condition=complete job/$job_name
     done
 }

@@ -3,8 +3,8 @@ set -e
 
 createClusters() {
     for env in $envs; do
-        # kind create cluster --name $env --config kind-configs/config.yaml
-        kind create cluster --name $env
+        # Config file required so that the port is routable from docker networks on linux
+        kind create cluster --name $env --config configs/kind-config.yaml
     done
     kind create cluster --name argo
 }
@@ -23,11 +23,8 @@ awaitArgo() {
     kubectl wait -n "$ns" deploy/argo-cd-argocd-redis  --for condition=available --timeout=5m
 }
 
-addArgoHelmRepo() {
-    helm repo add argo https://argoproj.github.io/argo-helm
-}
-
 helmInstallArgo() {
+    helm repo add argo https://argoproj.github.io/argo-helm
     kubectx kind-argo > /dev/null 2>&1
     helm -n default install argo-cd argo/argo-cd
     awaitArgo
@@ -68,7 +65,7 @@ createSecret() {
         # Find the port number this cluster runs with
         port=$(yq '.clusters[0].cluster.server' <<< "${raw_context}" | awk -F ':' '{print $3}')
         # remove the certificate-authority-data key, add insecure-skip-tls-verify (they are mutually exclusive), reconfigure host to a docker-friendly address
-        modified_context_b64=$(yq "del .clusters[0].cluster.certificate-authority-data | .clusters[0].cluster.insecure-skip-tls-verify = true | .clusters[0].cluster.server = \"https://host.docker.internal:${port}\"|@yaml|@base64" <<< "${raw_context}")
+        modified_context_b64=$(yq "del .clusters[0].cluster.certificate-authority-data | .clusters[0].cluster.insecure-skip-tls-verify = true | .clusters[0].cluster.server = \"https://${DOCKER_HOST_INTERNAL_ADDRESS}:${port}\"|@yaml|@base64" <<< "${raw_context}")
         # add the context for this environment as a secret to the secret manifest
         yq -i ".data.\"kind-${env}.yaml\" = \"${modified_context_b64}\"" $templates_dir/secret.yaml
     done
@@ -93,6 +90,11 @@ addClusters() {
     done
 }
 
+# Allow for overriding the Docker host internal address, as this does not exist on linux installs of docker
+if [ -z "${DOCKER_HOST_INTERNAL_ADDRESS}" ]; then
+    DOCKER_HOST_INTERNAL_ADDRESS="host.docker.internal"
+fi
+
 envs="dev staging prod"
 choices=( create-clusters delete-clusters install-argo uninstall-argo get-argo-admin argo-port-forward create-secret add-clusters await-argo bootstrap )
 
@@ -110,7 +112,6 @@ case $1 in
 
     # install-argo
     "${choices[2]}")
-        addArgoHelmRepo
         helmInstallArgo
         ;;
 

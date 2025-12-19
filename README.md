@@ -4,7 +4,11 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
 
 - [Local argocd multicluster with kind](#local-argocd-multicluster-with-kind)
 - [Design](#design)
+- [Network security note](#network-security-note)
 - [Requirements](#requirements)
+  - [Notes for linux / podman users](#notes-for-linux--podman-users)
+    - [Docker](#docker)
+    - [Podman](#podman)
 - [Usage](#usage)
   - [Create Clusters](#create-clusters)
   - [Example rendered manifests](#example-rendered-manifests)
@@ -30,6 +34,9 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
   * create job with kubernetes contexts & cluster addition script mounted from secret
   * run cluster addition script for the app cluster
 
+# Network security note
+
+I have had to configure kind to listen on `0.0.0.0` to be able to route between kind clusters on all platforms, the downside of which is that you will be exposing a cluster to your local network unless firewalled.
 
 # Requirements
 
@@ -39,6 +46,37 @@ You will need the following tools to run this repository:
 * [`yq`](https://mikefarah.gitbook.io/yq) (v4+)
 * [`kind`](https://kind.sigs.k8s.io/)
 * `docker`
+* `helm`
+
+## Notes for linux / podman users
+
+### Docker
+
+This repo works on linux with docker, however a couple of environment variables should be set:
+```
+# forces the use of docker if podman is also installed
+export KIND_EXPERIMENTAL_PROVIDER=docker
+# workaround the fact that host.docker.internal is not available on linux
+# this IP is valid unless you modify your default docker network
+export DOCKER_HOST_INTERNAL_ADDRESS=172.17.0.1
+```
+
+### Podman
+
+**TLDR** this repository is not compatible with podman, only docker.
+
+Ultimately this script does not support podman owing to [differences](https://github.com/containers/podman/issues/10878) in the way podman networking works limiting access to `host.docker.internal` or it's equivalent.
+
+If you try, you may find the script fails to build all the clusters with errors like:
+```
+too many open files
+```
+```
+ ✗ Preparing nodes 📦
+Deleted nodes: ["3-control-plane"]
+ERROR: failed to create cluster: could not find a log line that matches "Reached target .*Multi-User System.*|detected cgroup v1"
+```
+If so, this is a known [issue](https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files) with podman.
 
 # Usage
 

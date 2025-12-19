@@ -86,13 +86,9 @@ To create a new set of clusters:
 ```
 $ ./bootstrap.sh bootstrap
 Deleting cluster "dev" ...
-Deleted nodes: ["dev-control-plane"]
 Deleting cluster "staging" ...
-Deleted nodes: ["staging-control-plane"]
 Deleting cluster "prod" ...
-Deleted nodes: ["prod-control-plane"]
 Deleting cluster "argo" ...
-Deleted nodes: ["argo-control-plane"]
 Creating cluster "dev" ...
  • Ensuring node image (kindest/node:v1.35.0) 🖼  ...
  ✓ Ensuring node image (kindest/node:v1.35.0) 🖼
@@ -111,7 +107,7 @@ You can now use your cluster with:
 
 kubectl cluster-info --context kind-dev
 
-Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
+Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
 Creating cluster "staging" ...
  • Ensuring node image (kindest/node:v1.35.0) 🖼  ...
  ✓ Ensuring node image (kindest/node:v1.35.0) 🖼
@@ -130,7 +126,7 @@ You can now use your cluster with:
 
 kubectl cluster-info --context kind-staging
 
-Have a nice day! 👋
+Not sure what to do next? 😅  Check out https://kind.sigs.k8s.io/docs/user/quick-start/
 Creating cluster "prod" ...
  • Ensuring node image (kindest/node:v1.35.0) 🖼  ...
  ✓ Ensuring node image (kindest/node:v1.35.0) 🖼
@@ -168,12 +164,14 @@ You can now use your cluster with:
 
 kubectl cluster-info --context kind-argo
 
-Thanks for using kind! 😊
+Have a nice day! 👋
+"argo" has been added to your repositories
 NAME: argo-cd
-LAST DEPLOYED: Fri Dec 19 18:12:35 2025
+LAST DEPLOYED: Fri Dec 19 21:18:44 2025
 NAMESPACE: default
 STATUS: deployed
 REVISION: 1
+DESCRIPTION: Install complete
 TEST SUITE: None
 NOTES:
 In order to access the server UI you have the following options:
@@ -195,18 +193,19 @@ kubectl -n default get secret argocd-initial-admin-secret -o jsonpath="{.data.pa
 Awaiting argocd server & redis startup
 deployment.apps/argo-cd-argocd-server condition met
 deployment.apps/argo-cd-argocd-redis condition met
-Templates directory: /var/folders/wl/r9gvddvj5gs7vg94hm2jzdgh0000gp/T/tmp.9Y8oiKbVI8
-Applying manifest /var/folders/wl/r9gvddvj5gs7vg94hm2jzdgh0000gp/T/tmp.9Y8oiKbVI8/secret.yaml
+Templates directory: /tmp/tmp.OoVr5jbXGN
+Applying manifest /tmp/tmp.OoVr5jbXGN/secret.yaml
 secret/kubecontexts created
-Applying manifest /var/folders/wl/r9gvddvj5gs7vg94hm2jzdgh0000gp/T/tmp.dC3Bs3VkTH/job-dev.yaml
+Applying manifest /tmp/tmp.joxRo9gLAL/job-dev.yaml
 job.batch/argocd-add-cluster-dev created
-Applying manifest /var/folders/wl/r9gvddvj5gs7vg94hm2jzdgh0000gp/T/tmp.dC3Bs3VkTH/job-staging.yaml
+Applying manifest /tmp/tmp.joxRo9gLAL/job-staging.yaml
 job.batch/argocd-add-cluster-staging created
-Applying manifest /var/folders/wl/r9gvddvj5gs7vg94hm2jzdgh0000gp/T/tmp.dC3Bs3VkTH/job-prod.yaml
+Applying manifest /tmp/tmp.joxRo9gLAL/job-prod.yaml
 job.batch/argocd-add-cluster-prod created
+job.batch/argocd-add-cluster-dev condition met
+job.batch/argocd-add-cluster-staging condition met
 job.batch/argocd-add-cluster-prod condition met
-job.batch/argocd-add-cluster-prod condition met
-job.batch/argocd-add-cluster-prod condition met
+
 ```
 
 ## Example rendered manifests

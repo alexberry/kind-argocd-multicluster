@@ -160,6 +160,8 @@ job.batch/argocd-add-cluster-prod condition met
 job.batch/argocd-add-cluster-prod condition met
 ```
 
+You should now have all clusters built & argocd configured to connect to them. For an example of the manifests generated on the argo cluster, see [example_rendered_manifests](./example_rendered_manifests)
+
 ### Port-forwarding to argo
 
 To port forward to argocd:

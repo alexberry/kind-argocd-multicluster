@@ -1,8 +1,19 @@
-# local argocd multicluster with kind
+# Local argocd multicluster with kind
 
 This project sets up a set of clusters and a managing argo-cd cluster, to test gitops approaches using applicationset & clustergenerator. It uses [kind](https://kind.sigs.k8s.io/) & docker to achieve this.
 
-## Design
+- [Local argocd multicluster with kind](#local-argocd-multicluster-with-kind)
+- [Design](#design)
+- [Requirements](#requirements)
+- [Usage](#usage)
+  - [Create Clusters](#create-clusters)
+  - [Example rendered manifests](#example-rendered-manifests)
+  - [Port-forwarding to argo](#port-forwarding-to-argo)
+  - [Confirming cluster addition](#confirming-cluster-addition)
+  - [Working with clusters](#working-with-clusters)
+  - [Cleaning up](#cleaning-up)
+
+# Design
 
 * clean any historic clusters from this script
 * build 3 app clusters `dev staging prod` & an app cluster `argo` with [kind](https://kind.sigs.k8s.io/)
@@ -20,7 +31,7 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
   * run cluster addition script for the app cluster
 
 
-# Requirements:
+# Requirements
 
 You will need the following tools to run this repository:
 * `kubectl`
@@ -29,9 +40,9 @@ You will need the following tools to run this repository:
 * [`kind`](https://kind.sigs.k8s.io/)
 * `docker`
 
-## Usage
+# Usage
 
-### Create Clusters
+## Create Clusters
 
 To create a new set of clusters:
 ```
@@ -160,9 +171,11 @@ job.batch/argocd-add-cluster-prod condition met
 job.batch/argocd-add-cluster-prod condition met
 ```
 
-You should now have all clusters built & argocd configured to connect to them. For an example of the manifests generated on the argo cluster, see [example_rendered_manifests](./example_rendered_manifests)
+## Example rendered manifests
 
-### Port-forwarding to argo
+For an example of the manifests generated on the argo cluster, see [example_rendered_manifests](./example_rendered_manifests)
+
+## Port-forwarding to argo
 
 To port forward to argocd:
 ```
@@ -175,20 +188,20 @@ Forwarding from 127.0.0.1:8080 -> 8080
 Forwarding from [::1]:8080 -> 8080
 ```
 
-### Confirming cluster addition
+## Confirming cluster addition
 
 You should now be able to Navigate to [Settings / Clusters](https://localhost:8080/settings/clusters) & see all three clusters have been added:
 
 ![argocd clusters](images/clusters.png)
 
-### Working with clusters
+## Working with clusters
 You can use `kubectx` (e.g. `kubectx kind-dev`) to switch between the following kubernetes contexts after running bootstrap:
 * `kind-dev`
 * `kind-prod`
 * `kind-staging`
 * `kind-argo`
 
-### Cleaning up
+## Cleaning up
 
 Once you're done, you can remove all your kind clusters with:
 ```

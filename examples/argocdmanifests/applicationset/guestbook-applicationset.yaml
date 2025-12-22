@@ -28,7 +28,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/argoproj/argocd-example-apps/tree/master/helm-guestbook
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
         targetRevision: HEAD
         path: helm-guestbook
         helm:

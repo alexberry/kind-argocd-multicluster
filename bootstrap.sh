@@ -82,6 +82,15 @@ addClusters() {
         kubectl delete job argocd-add-cluster-$env > /dev/null 2>&1 || true
         # Generate a new job manifest for this environment
         cat templates/job.yaml| yq ".spec.template.spec.containers[0].env[0].value = \"kind-${env}\"|.metadata.name = \"${job_name}\"" > $templates_dir/job-$env.yaml
+        # Generate the labels arguments string for the cluster
+        unset label_args
+        for label in $(cat templates/cluster_definitions.yaml | yq ".clusters.${env}.labels|keys[]");do 
+            value=$(cat templates/cluster_definitions.yaml | yq ".clusters.${env}.labels.$label")
+            label_args="${label_args}--label ${label}=${value} "
+        done
+        echo -e "$env:\t$label_args"
+        # Add label args to job manifest
+        yq -i ".spec.template.spec.containers[0].env[1].value = \"${label_args}\"" $templates_dir/job-$env.yaml
         echo "Applying manifest $templates_dir/job-$env.yaml"
         kubectl apply -n default -f $templates_dir/job-$env.yaml
     done
@@ -96,7 +105,7 @@ if [ -z "${DOCKER_HOST_INTERNAL_ADDRESS}" ]; then
     DOCKER_HOST_INTERNAL_ADDRESS="host.docker.internal"
 fi
 
-envs="dev staging prod"
+envs=$(cat templates/cluster_definitions.yaml | yq '.clusters|keys[]')
 choices=( create-clusters delete-clusters install-argo uninstall-argo get-argo-admin argo-port-forward create-secret add-clusters await-argo bootstrap )
 
 case $1 in

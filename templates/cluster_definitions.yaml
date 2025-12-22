@@ -1,0 +1,23 @@
+clusters:
+    dev:
+        labels:
+            tier: dev
+            env: platform
+    dev2:
+        labels:
+            tier: dev
+            env: platform
+            extra_label: foo
+            extral_label2: bar
+    staging:
+        labels:
+            tier: staging
+            env: platform
+    prod:
+        labels:
+            tier: production
+            env: platform
+    argocd:
+        labels:
+            tier: production
+            env: internal-services

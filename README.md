@@ -9,13 +9,15 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
   - [Notes for linux / podman users](#notes-for-linux--podman-users)
     - [Docker](#docker)
     - [Podman](#podman)
-- [Usage](#usage)
+- [`bootstrap.sh` Usage](#bootstrapsh-usage)
+  - [Defining your clusters](#defining-your-clusters)
   - [Create Clusters](#create-clusters)
   - [Example rendered manifests](#example-rendered-manifests)
   - [Port-forwarding to argo](#port-forwarding-to-argo)
   - [Confirming cluster addition](#confirming-cluster-addition)
   - [Working with clusters](#working-with-clusters)
   - [Cleaning up](#cleaning-up)
+- [Example ArgoCD Manifests](#example-argocd-manifests)
 
 # Design
 
@@ -78,7 +80,14 @@ ERROR: failed to create cluster: could not find a log line that matches "Reached
 ```
 If so, this is a known [issue](https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files) with podman.
 
-# Usage
+# `bootstrap.sh` Usage
+
+## Defining your clusters
+
+Clusters & their labels are defined in the file [templates/cluster_definitions.yaml](templates/cluster_definitions.yaml). By default it adds the label `env` to determine which type of cluster it is (`platform` or `internal-services`), and `tier` to determine the configuration set to apply to the given environment (e.g. `dev`, `staging`, `prod`). You can add additional labels * clusters as you see fit, if you want to modify the labels after initial cluster creation you can apply the changes with the commands:
+```
+./bootstrap.sh add-clusters
+```
 
 ## Create Clusters
 
@@ -210,7 +219,7 @@ job.batch/argocd-add-cluster-prod condition met
 
 ## Example rendered manifests
 
-For an example of the manifests generated on the argo cluster, see [example_rendered_manifests](./example_rendered_manifests)
+For an example of the manifests generated on the argo cluster, see [examples/bootstrap-manifests](./examples/bootstrap-manifests)
 
 ## Port-forwarding to argo
 
@@ -252,3 +261,7 @@ Deleted nodes: ["prod-control-plane"]
 Deleting cluster "argo" ...
 Deleted nodes: ["argo-control-plane"]
 ```
+
+# Example ArgoCD Manifests
+
+Now we have a working multi-cluster setup, we can explore manifests such as [ApplicationSet](https://argo-cd.readthedocs.io/en/latest/user-guide/application-set/), while using generators such as the [Cluster Generator](https://argo-cd.readthedocs.io/en/latest/operator-manual/applicationset/Generators-Cluster/) to target deployments to specific clusters, with specific configuration. I have created some examples that work with the default cluster definitions in [examples/argocdmanifests](examples/argocdmanifests).

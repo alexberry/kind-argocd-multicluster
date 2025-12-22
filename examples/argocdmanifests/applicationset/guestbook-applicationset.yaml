@@ -1,0 +1,39 @@
+# based on:
+# https://argo-cd.readthedocs.io/en/latest/user-guide/application-set/
+# https://argo-cd.readthedocs.io/en/latest/operator-manual/applicationset/Generators-Cluster/
+# https://github.com/argoproj/argocd-example-apps
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters:
+      selector:
+        matchExpressions:
+          - key: tier
+            operator: In
+            values:
+              - "dev"
+              - "staging"
+          - key: env
+            operator: In
+            values:
+              - "platform"
+  template:
+    metadata:
+      name: '{{.name}}-guestbook'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps/tree/master/helm-guestbook
+        targetRevision: HEAD
+        path: helm-guestbook
+        helm:
+          parameters:
+          
+      destination:
+        server: '{{.server}}'
+        namespace: default

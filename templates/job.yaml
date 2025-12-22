@@ -16,6 +16,8 @@ spec:
         env:
         - name: KIND_CLUSTER_NAME
           value: replaceme
+        - name: KIND_CLUSTER_LABEL_ARGS
+          value: ""
         - name: KIND_ARGOCD_ADMIN_PASS
           valueFrom:
             secretKeyRef:

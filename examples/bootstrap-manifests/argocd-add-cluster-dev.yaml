@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"batch/v1","kind":"Job","metadata":{"annotations":{},"name":"argocd-add-cluster-dev","namespace":"default"},"spec":{"backoffLimit":1,"template":{"spec":{"containers":[{"command":["/usr/bin/env","bash","/kubeconfig/cluster_add.sh"],"env":[{"name":"KIND_CLUSTER_NAME","value":"kind-dev"},{"name":"KIND_CLUSTER_LABEL_ARGS","value":"--label tier=dev --label env=platform "},{"name":"KIND_ARGOCD_ADMIN_PASS","valueFrom":{"secretKeyRef":{"key":"password","name":"argocd-initial-admin-secret"}}}],"image":"quay.io/argoproj/argocd:latest","name":"argocd","volumeMounts":[{"mountPath":"/kubeconfig","name":"kubecontexts","readOnly":true}]}],"restartPolicy":"Never","volumes":[{"name":"kubecontexts","secret":{"secretName":"kubecontexts"}}]}}}}
+  creationTimestamp: "2025-12-22T11:46:16Z"
+  generation: 1
+  labels:
+    batch.kubernetes.io/controller-uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+    batch.kubernetes.io/job-name: argocd-add-cluster-dev
+    controller-uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+    job-name: argocd-add-cluster-dev
+  name: argocd-add-cluster-dev
+  namespace: default
+  resourceVersion: "3708"
+  uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+spec:
+  backoffLimit: 1
+  completionMode: NonIndexed
+  completions: 1
+  manualSelector: false
+  parallelism: 1
+  podReplacementPolicy: TerminatingOrFailed
+  selector:
+    matchLabels:
+      batch.kubernetes.io/controller-uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+  suspend: false
+  template:
+    metadata:
+      labels:
+        batch.kubernetes.io/controller-uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+        batch.kubernetes.io/job-name: argocd-add-cluster-dev
+        controller-uid: 5aa89c31-2fb2-47cd-8d90-e3c316b22ef4
+        job-name: argocd-add-cluster-dev
+    spec:
+      containers:
+      - command:
+        - /usr/bin/env
+        - bash
+        - /kubeconfig/cluster_add.sh
+        env:
+        - name: KIND_CLUSTER_NAME
+          value: kind-dev
+        - name: KIND_CLUSTER_LABEL_ARGS
+          value: '--label tier=dev --label env=platform '
+        - name: KIND_ARGOCD_ADMIN_PASS
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: argocd-initial-admin-secret
+        image: quay.io/argoproj/argocd:latest
+        imagePullPolicy: Always
+        name: argocd
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /kubeconfig
+          name: kubecontexts
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: kubecontexts
+        secret:
+          defaultMode: 420
+          secretName: kubecontexts
+status:
+  completionTime: "2025-12-22T11:46:20Z"
+  conditions:
+  - lastProbeTime: "2025-12-22T11:46:20Z"
+    lastTransitionTime: "2025-12-22T11:46:20Z"
+    message: Reached expected number of succeeded pods
+    reason: CompletionsReached
+    status: "True"
+    type: SuccessCriteriaMet
+  - lastProbeTime: "2025-12-22T11:46:20Z"
+    lastTransitionTime: "2025-12-22T11:46:20Z"
+    message: Reached expected number of succeeded pods
+    reason: CompletionsReached
+    status: "True"
+    type: Complete
+  ready: 0
+  startTime: "2025-12-22T11:46:16Z"
+  succeeded: 1
+  terminating: 0
+  uncountedTerminatedPods: {}

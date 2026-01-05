@@ -19,8 +19,8 @@ deleteClusters() {
 awaitArgo() {
     echo "Awaiting argocd server & redis startup"
     kubectx kind-argo > /dev/null 2>&1
-    kubectl wait -n "$ns" deploy/argo-cd-argocd-server --for condition=available --timeout=5m
-    kubectl wait -n "$ns" deploy/argo-cd-argocd-redis  --for condition=available --timeout=5m
+    kubectl wait -n default deploy/argo-cd-argocd-server --for condition=available --timeout=5m
+    kubectl wait -n default deploy/argo-cd-argocd-redis  --for condition=available --timeout=5m
 }
 
 helmInstallArgo() {

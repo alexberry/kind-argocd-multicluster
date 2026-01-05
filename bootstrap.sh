@@ -96,7 +96,7 @@ addClusters() {
     done
     for env in $envs; do
         job_name=argocd-add-cluster-$env
-        kubectl wait --for=condition=complete job/$job_name
+        kubectl wait --for=condition=complete job/$job_name --timeout=5m
     done
 }
 

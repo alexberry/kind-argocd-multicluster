@@ -1,0 +1,58 @@
+# ApplicationSet for http-echo Helm chart
+# Deploys http-echo to clusters matching the selector
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: http-echo
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - clusters:
+      selector:
+        matchExpressions:
+          - key: tier
+            operator: In
+            values:
+              - "dev"
+              - "staging"
+          - key: env
+            operator: In
+            values:
+              - "platform"
+      values:
+        foo: bar
+        hpaMaxReplicas: "1"
+  - clusters:
+      selector:
+        matchExpressions:
+          - key: tier
+            operator: In
+            values:
+              - "production"
+          - key: env
+            operator: In
+            values:
+              - "platform"
+      values:
+        foo: baz
+        hpaMaxReplicas: "2"
+  template:
+    metadata:
+      name: '{{.name}}-http-echo'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
+        targetRevision: HEAD
+        path: examples/charts/http-echo
+        helm:
+          parameters:
+            - name: 'env.foo'
+              value: '{{.values.foo}}'
+            - name: 'hpa.maxReplicas'
+              value: '{{.values.hpaMaxReplicas}}'
+
+      destination:
+        server: '{{.server}}'
+        namespace: default

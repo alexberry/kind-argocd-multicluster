@@ -23,7 +23,7 @@ spec:
           # In a real setup, CI would update versions.yaml on build
           - git:
               repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
-              revision: generator-test
+              revision: HEAD
               files:
                 - path: examples/gitops-config/versions.yaml
           # Cluster generator for target environments
@@ -45,7 +45,7 @@ spec:
       sources:
         # Source 1: The Helm chart
         - repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
-          targetRevision: generator-test
+          targetRevision: HEAD
           path: examples/charts/http-echo
           helm:
             # Allow missing override files - ephemeral envs may not have one
@@ -59,7 +59,7 @@ spec:
               - $values/examples/gitops-config/environments/{{.name}}/http-echo.yaml
         # Source 2: Values files reference
         - repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
-          targetRevision: generator-test
+          targetRevision: HEAD
           ref: values
       destination:
         server: '{{.server}}'

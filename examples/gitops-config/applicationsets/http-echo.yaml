@@ -1,0 +1,72 @@
+# ApplicationSet with Matrix Generator
+# Demonstrates: Git generator (versions) + Cluster generator (environments)
+# Multi-source pattern with base + optional per-cluster overrides
+#
+# Override Pattern:
+#   - base/http-echo/values.yaml applies to ALL clusters
+#   - environments/<cluster-name>/http-echo.yaml optionally overrides
+#   - If no override file exists for a cluster, base values are used (no error)
+#
+# This supports ephemeral environments: just register a cluster and it gets
+# base defaults. Add an override file when you need custom config.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: http-echo-matrix
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          # Git generator for version information
+          # In a real setup, CI would update versions.yaml on build
+          - git:
+              repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
+              revision: generator-test
+              files:
+                - path: examples/gitops-config/versions.yaml
+          # Cluster generator for target environments
+          # Selects clusters with env=platform label
+          - clusters:
+              selector:
+                matchLabels:
+                  env: platform
+  template:
+    metadata:
+      name: '{{.name}}-http-echo-matrix'
+      labels:
+        app: http-echo
+        cluster: '{{.name}}'
+        tier: '{{.metadata.labels.tier}}'
+    spec:
+      project: default
+      # Multi-source: chart + values from same repo
+      sources:
+        # Source 1: The Helm chart
+        - repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
+          targetRevision: generator-test
+          path: examples/charts/http-echo
+          helm:
+            # Allow missing override files - ephemeral envs may not have one
+            ignoreMissingValueFiles: true
+            # Values files from the $values ref (Source 2)
+            # Order matters: later files override earlier ones
+            valueFiles:
+              # Base values - apply to ALL clusters
+              - $values/examples/gitops-config/base/http-echo/values.yaml
+              # Per-cluster overrides - optional, keyed by cluster name
+              - $values/examples/gitops-config/environments/{{.name}}/http-echo.yaml
+        # Source 2: Values files reference
+        - repoURL: https://github.com/alexberry/kind-argocd-multicluster.git
+          targetRevision: generator-test
+          ref: values
+      destination:
+        server: '{{.server}}'
+        namespace: http-echo
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true

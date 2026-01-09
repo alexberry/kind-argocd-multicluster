@@ -1,0 +1,9 @@
+# Overrides for cluster: staging
+# This file is optional - clusters without an override file get base values only
+env:
+  CLUSTER_NAME: "staging"
+  DEBUG: "true"
+  LOG_LEVEL: "info"
+
+hpa:
+  maxReplicas: 2

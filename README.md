@@ -18,11 +18,13 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
   - [Working with clusters](#working-with-clusters)
   - [Cleaning up](#cleaning-up)
 - [Example ArgoCD Manifests](#example-argocd-manifests)
+  - [Simple Examples](#simple-examples)
+  - [GitOps Config Pattern](#gitops-config-pattern)
 
 # Design
 
 * clean any historic clusters from this script
-* build 3 app clusters `dev staging prod` & an app cluster `argo` with [kind](https://kind.sigs.k8s.io/)
+* build app clusters as defined in `templates/cluster_definitions.yaml` (default: `dev`, `dev2`, `staging`, `prod`) & a management cluster `argo` with [kind](https://kind.sigs.k8s.io/)
 * install argocd with helm in to the argo cluster and wait for it to be available
 * create a secret on the `argo` cluster
     * export the kubernetes contexts for each app cluster
@@ -87,7 +89,11 @@ If so, this is a known [issue](https://kind.sigs.k8s.io/docs/user/known-issues/#
 
 ## Defining your clusters
 
-Clusters & their labels are defined in the file [templates/cluster_definitions.yaml](templates/cluster_definitions.yaml). By default it adds the label `env` to determine which type of cluster it is (`platform` or `internal-services`), and `tier` to determine the configuration set to apply to the given environment (e.g. `dev`, `staging`, `prod`). You can add additional labels * clusters as you see fit, if you want to modify the labels after initial cluster creation you can apply the changes with the commands:
+Clusters & their labels are defined in the file [templates/cluster_definitions.yaml](templates/cluster_definitions.yaml). By default it adds:
+- `env` - cluster type (`platform` or `internal-services`)
+- `tier` - environment tier (`dev`, `staging`, `prod`)
+
+These labels are used by ApplicationSet cluster generators to target deployments. You can add additional labels and clusters as you see fit. To modify labels after initial cluster creation:
 ```
 ./bootstrap.sh add-clusters
 ```
@@ -239,15 +245,16 @@ Forwarding from [::1]:8080 -> 8080
 
 ## Confirming cluster addition
 
-You should now be able to Navigate to [Settings / Clusters](https://localhost:8080/settings/clusters) & see all three clusters have been added:
+You should now be able to Navigate to [Settings / Clusters](https://localhost:8080/settings/clusters) & see all the app clusters have been added:
 
 ![argocd clusters](images/clusters.png)
 
 ## Working with clusters
 You can use `kubectx` (e.g. `kubectx kind-dev`) to switch between the following kubernetes contexts after running bootstrap:
 * `kind-dev`
-* `kind-prod`
+* `kind-dev2`
 * `kind-staging`
+* `kind-prod`
 * `kind-argo`
 
 ## Cleaning up
@@ -267,4 +274,43 @@ Deleted nodes: ["argo-control-plane"]
 
 # Example ArgoCD Manifests
 
-Now we have a working multi-cluster setup, we can explore manifests such as [ApplicationSet](https://argo-cd.readthedocs.io/en/latest/user-guide/application-set/), while using generators such as the [Cluster Generator](https://argo-cd.readthedocs.io/en/latest/operator-manual/applicationset/Generators-Cluster/) to target deployments to specific clusters, with specific configuration. I have created some examples that work with the default cluster definitions in [examples/argocdmanifests](examples/argocdmanifests).
+Now we have a working multi-cluster setup, we can explore manifests such as [ApplicationSet](https://argo-cd.readthedocs.io/en/latest/user-guide/application-set/), while using generators such as the [Cluster Generator](https://argo-cd.readthedocs.io/en/latest/operator-manual/applicationset/Generators-Cluster/) to target deployments to specific clusters, with specific configuration.
+
+## Simple Examples
+
+Basic ApplicationSet examples using cluster generator with label selectors:
+- [examples/argocdmanifests](examples/argocdmanifests) - Simple cluster generator patterns
+
+## GitOps Config Pattern
+
+A more advanced example demonstrating production-ready GitOps patterns:
+- [examples/gitops-config](examples/gitops-config) - Matrix generator with version management
+
+This example demonstrates:
+- **Matrix Generator**: Combines Git generator (for versions) + Cluster generator (for targeting)
+- **Multi-source Helm**: Chart source + values files from separate paths
+- **Base + Override pattern**: Shared defaults with optional per-cluster overrides
+- **Ephemeral environment support**: `ignoreMissingValueFiles` allows clusters without explicit config
+
+Structure:
+```
+examples/gitops-config/
+├── versions.yaml                    # Central version manifest (replaces terraform state)
+├── applicationsets/
+│   └── http-echo.yaml              # Matrix generator ApplicationSet
+├── base/
+│   └── http-echo/
+│       └── values.yaml             # Shared defaults for ALL clusters
+└── environments/
+    ├── dev/http-echo.yaml          # Overrides for cluster "dev"
+    ├── staging/http-echo.yaml      # Overrides for cluster "staging"
+    └── prod/http-echo.yaml         # Overrides for cluster "prod"
+```
+
+To deploy:
+```bash
+kubectx kind-argo
+kubectl apply -f examples/gitops-config/applicationsets/http-echo.yaml
+```
+
+The `dev2` cluster has no override file, demonstrating that ephemeral/dynamic clusters automatically receive base defaults.

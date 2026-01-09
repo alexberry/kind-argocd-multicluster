@@ -15,7 +15,7 @@ clusters:
             env: platform
     prod:
         labels:
-            tier: production
+            tier: prod
             env: platform
     argocd:
         labels:

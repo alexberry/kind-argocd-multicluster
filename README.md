@@ -9,7 +9,7 @@ This project sets up a set of clusters and a managing argo-cd cluster, to test g
   - [Notes for linux / podman users](#notes-for-linux--podman-users)
     - [Docker](#docker)
     - [Podman](#podman)
-- [`bootstrap.sh` Usage](#bootstrapsh-usage)
+- [Usage](#usage)
   - [Defining your clusters](#defining-your-clusters)
   - [Create Clusters](#create-clusters)
   - [Example rendered manifests](#example-rendered-manifests)
@@ -85,7 +85,26 @@ ERROR: failed to create cluster: could not find a log line that matches "Reached
 ```
 If so, this is a known [issue](https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files) with podman.
 
-# `bootstrap.sh` Usage
+# Usage
+
+Run `make help` to see all available commands:
+```
+$ make help
+Usage: make <target>
+
+Targets:
+  help                 Show this help
+  create-clusters      Create all KIND clusters from cluster_definitions.yaml
+  delete-clusters      Delete all KIND clusters
+  bootstrap            Full reset: delete, create, configure
+  await-argo           Wait for ArgoCD server and redis to be ready
+  install-argo         Install ArgoCD via Helm (waits for readiness)
+  uninstall-argo       Uninstall ArgoCD
+  get-argo-admin       Print ArgoCD admin password
+  argo-port-forward    Port-forward to ArgoCD UI (https://localhost:8080)
+  create-secret        Create kubeconfig secret for cluster registration
+  add-clusters         Register/update app clusters in ArgoCD
+```
 
 ## Defining your clusters
 
@@ -95,14 +114,14 @@ Clusters & their labels are defined in the file [templates/cluster_definitions.y
 
 These labels are used by ApplicationSet cluster generators to target deployments. You can add additional labels and clusters as you see fit. To modify labels after initial cluster creation:
 ```
-./bootstrap.sh add-clusters
+make add-clusters
 ```
 
 ## Create Clusters
 
 To create a new set of clusters:
 ```
-$ ./bootstrap.sh bootstrap
+$ make bootstrap
 Deleting cluster "dev" ...
 Deleting cluster "staging" ...
 Deleting cluster "prod" ...
@@ -234,8 +253,7 @@ For an example of the manifests generated on the argo cluster, see [examples/boo
 
 To port forward to argocd:
 ```
-$ ./bootstrap.sh argo-port-forward
-Switched to context "kind-argo".
+$ make argo-port-forward
 Admin user: admin
 Admin password: fKBWYUgY5sHS4KYB
 Visit https://localhost:8080
@@ -261,7 +279,7 @@ You can use `kubectx` (e.g. `kubectx kind-dev`) to switch between the following 
 
 Once you're done, you can remove all your kind clusters with:
 ```
-$ ./bootstrap.sh delete-clusters
+$ make delete-clusters
 Deleting cluster "dev" ...
 Deleted nodes: ["dev-control-plane"]
 Deleting cluster "staging" ...

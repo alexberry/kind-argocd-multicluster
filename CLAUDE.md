@@ -28,7 +28,7 @@ This repository creates a local multi-cluster ArgoCD environment using KIND (Kub
 
 ### Key Components
 
-- **[bootstrap.sh](bootstrap.sh)**: Main orchestration script with functions for each lifecycle operation
+- **[Makefile](Makefile)**: Main orchestration with targets for each lifecycle operation (run `make help` for available commands)
 - **[templates/cluster_definitions.yaml](templates/cluster_definitions.yaml)**: Defines all clusters and their labels (tier, env, etc.)
 - **[templates/job.yaml](templates/job.yaml)**: Job template for adding clusters to ArgoCD
 - **[templates/cluster_add.sh](templates/cluster_add.sh)**: Script executed in jobs to authenticate and register clusters
@@ -43,20 +43,21 @@ This repository creates a local multi-cluster ArgoCD environment using KIND (Kub
 
 ### Full Environment Setup
 ```bash
-./bootstrap.sh bootstrap  # Deletes existing clusters, creates new ones, installs ArgoCD, registers clusters
+make bootstrap        # Deletes existing clusters, creates new ones, installs ArgoCD, registers clusters
 ```
 
 ### Individual Operations
 ```bash
-./bootstrap.sh create-clusters      # Create KIND clusters only
-./bootstrap.sh delete-clusters      # Delete all KIND clusters
-./bootstrap.sh install-argo         # Install ArgoCD via Helm
-./bootstrap.sh uninstall-argo       # Uninstall ArgoCD
-./bootstrap.sh create-secret        # Create kubeconfig secret
-./bootstrap.sh add-clusters         # Register clusters with ArgoCD (also used to update labels)
-./bootstrap.sh await-argo           # Wait for ArgoCD to be ready
-./bootstrap.sh argo-port-forward    # Port-forward to ArgoCD UI (https://localhost:8080)
-./bootstrap.sh get-argo-admin       # Get ArgoCD admin password
+make help             # Show all available targets with descriptions
+make create-clusters  # Create KIND clusters only
+make delete-clusters  # Delete all KIND clusters
+make install-argo     # Install ArgoCD via Helm
+make uninstall-argo   # Uninstall ArgoCD
+make create-secret    # Create kubeconfig secret
+make add-clusters     # Register clusters with ArgoCD (also used to update labels)
+make await-argo       # Wait for ArgoCD to be ready
+make argo-port-forward # Port-forward to ArgoCD UI (https://localhost:8080)
+make get-argo-admin   # Get ArgoCD admin password
 ```
 
 ### Working with Clusters
@@ -97,15 +98,16 @@ Not supported due to networking limitations with `host.docker.internal` equivale
 1. Edit [templates/cluster_definitions.yaml](templates/cluster_definitions.yaml)
 2. To add/modify clusters after initial creation:
    ```bash
-   ./bootstrap.sh delete-clusters
-   ./bootstrap.sh create-clusters
-   ./bootstrap.sh install-argo
-   ./bootstrap.sh create-secret
-   ./bootstrap.sh add-clusters
+   make delete-clusters
+   make create-clusters
+   make install-argo
+   make create-secret
+   make add-clusters
    ```
+   Or simply: `make bootstrap`
 3. To update labels only on existing clusters:
    ```bash
-   ./bootstrap.sh add-clusters  # Uses --upsert flag in cluster_add.sh
+   make add-clusters  # Uses --upsert flag in cluster_add.sh
    ```
 
 ## ApplicationSet Patterns

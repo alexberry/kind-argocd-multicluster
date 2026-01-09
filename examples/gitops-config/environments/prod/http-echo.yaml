@@ -1,0 +1,10 @@
+# Overrides for cluster: prod
+# This file is optional - clusters without an override file get base values only
+env:
+  CLUSTER_NAME: "prod"
+  DEBUG: "false"
+  LOG_LEVEL: "warn"
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 5

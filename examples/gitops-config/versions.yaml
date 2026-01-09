@@ -1,0 +1,7 @@
+# Central version manifest - replaces terraform state versioning
+# CI updates this file on build, ArgoCD syncs on change
+applications:
+  http-echo:
+    dev: "latest"
+    staging: "latest"
+    prod: "latest"
